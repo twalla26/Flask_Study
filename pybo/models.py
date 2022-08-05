@@ -17,10 +17,15 @@ class Question(db.Model): # 모델 클래스를 만드려면 db.Model 클래스�
 class Answer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id', ondelete='CASCADE'))
-    question = db.relationship('Question', backref=db.backref('answer_set'))
+    question = db.relationship('Question', backref=db.backref('answer_set', cascade='all, delete-orphan'))
     content = db.Column(db.Text(), nullable=False)
     create_date = db.Column(db.DateTime(), nullable=False)
     # question_id: 답변을 달 질문 데이터의 고유 번호. 모델을 서로 연결해야 하므로 db.ForeigKey(외래키)를 사용.
     # db.ForeignKey의 첫 번째 파라미터 'question.id'는 Answer모델의 question_id 속성이 question 테이블의 id 컬럼과 연결됨을 의미. (question 객체의 속성인 id와 다름.) 테이블 != 객체
     # Question모델을 통해 테이블이 생성되면 테이블명은 question이 된다. (대소문자 때문에 헷갈리지 않도록 주의하자.)
+    # 두번째 파라미터 ondelete는 삭제 연동 설정. 질문을 삭제하면 해당 답변들도 함께 삭제됨. (데이터베이스 설정이라, 데이터베이스 툴에서 쿼리로 삭제할 때만 답변들도 삭제된다.) -> 밑에서 보완됨.
+    # question: 답변모델에서 질문 모델을 참조하기 위해 추가. db.relationship을 통해 답변 모델에서 연결된 질문 모델의 제목을 answer.question.subject로 참조할 수 있음.
+    # db.relationship의 첫 번째 파라미터는 참조할 모델명(Question)이고, 두 번째 backref 파라미터는 역참조 설정임. 
+    # 역참조: 질문에서 답변을 거꾸로 참조하는 것. (어떤 질문 객체가 a_question라면 a_question.answer_set로 질문에 달린 답변들을 참조할 수 있음.)
+    # cascade='all, delete-orphan'을 통해 파이썬 코드만으로 답변 데이터 삭제가 가능해짐.
     

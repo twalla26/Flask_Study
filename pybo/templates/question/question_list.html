@@ -1,0 +1,13 @@
+<!-- 질문 목록 -->
+{% if question_list %} <!-- 템플릿 태그, 파이썬 코드와 연결됨. render_template 함수에서 전달받은 질문 목록 데이터 question_list가 있는지 검사 -->
+    <ul> <!-- unordered list -> 순서가 필요없는 목록을 만듦. -->
+        {% for question in question_list %} <!-- question_list에 있는 데이터를 하나씩 꺼내 question 객체에 대입 -->
+        <li><a href="{{ url_for('question.detail', question_id=quesion.id) }}">{{ question.subject }}</a></li> <!-- li: list -> 목록을 만듦. -->
+        <!-- a 태그: 하이퍼링크를 걸어주는 태그 (href: 클릭 시 이동할 링크) -> question 객체의 제목(question.subject)를 클릭하면 그 질문에 해당하는 상세 페이지로 이동 -->
+        <!-- url_for: question이란 별칭으로 등록된 블루프린트의 detail함수 실행, 파라미터로 question.id 전달 -->
+        <!-- {{ question.id }}: 바로 앞의 for 문에서 얻은 question 객체의 id를 출력 -->
+        {% endfor %} <!-- for문 종료 --> 
+    </ul>
+{% else %} <!-- question이 하나도 없다면 --> 
+    <p>질문이 없습니다.</p> <!--  p: paragraph -> 한 문단을 만듦.--> 
+{% endif %} <!-- if문 종료 --> 

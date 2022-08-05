@@ -1,4 +1,9 @@
-from flask import Blueprint # flask 모듈에서 Blueprint 클래스 import
+from flask import Blueprint # URL과 함수의 매핑을 관리하기 위해 사용하는 클래스
+from flask import url_for # url_for(라우팅 함수명): 라우팅 함수에 매핑되어있는 url을 반환
+from werkzeug.utils import redirect # redirect(URL): URL 페이지로 이동
+from flask import render_template # 데이터를 render_template 함수의 파라미터로 전달하면 템플릿에서 해당 데이터로 화면을 구성할 수 있음. 
+# 템플릿 파일: 파이썬 문법을 사용할 수 있는 html파일 
+from pybo.models import Question # models.py파일에서 Question모델 import -> question_list에 질문 목록 저장
 
 bp = Blueprint('main', __name__, url_prefix='/') # Blueprint 클래스로 bp 객체 생성.
 # 첫 번째 인수 'main'은 블루프린트의 "별칭". -> 이후 url_for 함수에서 사용됨.
@@ -16,4 +21,8 @@ def hello_pybo(): # '/hello' URL이 요청되면 플라스크는 hello_pybo 함�
 
 @bp.route('/')
 def index():
-    return 'Pybo index'
+    return redirect(url_for('question._list'))
+    # redirect(URL): URL 페이지로 이동
+    # url_for(라우팅 함수명): 라우팅 함수에 매핑되어있는 url을 반환
+    # question: 등록된 블루프린트의 별칭, _list: 블루프린트에 등록된 함수명 
+    # -> question이라는 별칭으로 등록한 question_views.py 파일의 _list 함수를 의미 -> bp의 프리픽스 URL인 /question/과 /list/가 더해진 /question/list/ URL을 반환
