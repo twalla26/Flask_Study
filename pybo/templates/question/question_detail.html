@@ -1,4 +1,42 @@
-<h1>{{ question.subject }}</h1> <!-- h 태그: heading -> 제목(옆에 붙은 숫자가 작을수록 글자 크기가 큼), question은 render_template 함수에 전달한 질문 객체 -->
-<div> <!-- div 태그: division -> 특정 영역이나 구획을 정의할 때 사용 -->
-    {{ question.content }} <!-- 질문 내용 레이아웃 -->
+<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}"> <!-- static 디렉터리의 style.css 파일을 연결한다는 의미 -->
+<!-- link태그: 해당 문서와 외부 소스 사이의 관계를 정의, rel 속성: 필수 속성으로 연관관계(relationship) 명시, href(hypertext reference): 링크될 외부 리소스의 URL 명시 -->
+<div class="container my-3">
+    <!-- 질문 -->
+    <h2 class="border-bottom py-2">{{ question.subject }}</h2> <!-- 질문 제목 -->
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;">{{ question.content }}</div> <!-- 질문 내용 -->
+            <div class="d-flex justify-content-end">
+                <div class="badge bg-light text-dark p-2">
+                    {{ question.create_date }} <!-- 질문 작성 일시 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 답변 목록 -->
+    <h5 class="border-bottom my-3 py-2">{{ question.answer_set|length }}개의 답변이 있습니다.</h5> <!-- 답변 갯수 -->
+    {% for answer in question.answer_set %} <!-- question.answer_set에 있는 데이터를 하나씩 꺼내 answer 객체에 대입 -->
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;">{{ answer.content }}</div> <!-- answer 객체의 내용들을 나열 -->
+            <div class="d-flex justify-content-end">
+                <div class="badge bg-light text-dark p-2">
+                    {{ answer.create_date }} <!-- answer 객체의 질문 작성일시 나열 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    <!-- 답변 등록 -->
+    <form action="{{ url_for('answer.create', question_id=question.id) }}" method="post" class="my-3"> <!-- 답변 등록 폼 -->
+        <!-- form 태그: 사용자로부터 데이터를 입력을 받을 수 있도록 함. action 속성: form 제출시 데이터를 어디로 보낼지 지정(url) -->
+        <!-- method 속성: 데이터를 보낼 때 사용할 HTTP 메서드 지정 -->
+        <div class="mb-3">
+            <textarea name="content" id="content" class="form-control" rows="10"></textarea> <!-- 답변 등록 칸 -->
+            <!-- textarea 태그: 여러 줄을 입력할 수 있는 텍스트 필드, name 속성: 텍스트 요소의 이름 명시, id 속성: 요소의 고유 식별자, rows 속성: 총 10줄-->
+        </div>
+        <input type="submit" value="답변등록" class="btn btn-primary"> <!-- 답변 등록 버튼 -->
+            <!-- input 태그: form 태그에서 제일 중요한 역할로 사용자로부터 정보를 입력 받음. -->
+            <!-- type 속성: 입력 태그의 유형(submit: 서버로 제출/전송하는 버튼) value 속성: 입력 태그의 초깃값(사용자가 변경할 수 있음)-->
+        </form>
 </div>
