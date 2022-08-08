@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- 질문 등록 -->
+<div class="container">
+    <h5 class="my-3 border-bottom pb-2">질문등록</h5>
+    <form method="post" class="my-3"> <!-- 질문 등록 폼, form 태그: 사용자로부터 데이터를 입력을 받을 수 있도록 함. post: 서버에 데이터를 보냄.-->
+        {{ form.csrf_token }} <!-- form 엘리먼트를 통해 전송된 데이터가 실제 웹 사이트에서 만들어진 데이터인지 검증하는 데 필요한 CSRF 토큰 -->
+        <!-- 오류표시 Start --> <!-- create함수에서 form.validate_on_submit() 코드가 실패하면 폼에는 오류 내용이 자동으로 등록됨 -->
+        {% if form.errors %} <!-- 등록된 오류 표시 -->
+        <div class="alert alert-danger" role="alert"> 
+            {% for field, errors in form.errors.items() %} <!-- field: subject나 content와 같은 입력 폼의 필드 -->
+            <strong>{{ form[field].label }}</strong> <!-- strong 태그: 해당 콘텐츠의 중요성이나 심각함, 긴급함 등을 강조, 오류가 있는 필드의 label을 굵은 글씨로 --> 
+            <ul>
+                {% for error in errors %} <!-- 생긴 오류들 각각 -->
+                <li>{{ error }}</li> <!-- 오류 내용 -->
+                {% endfor %}}
+            </ul>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <!-- 오류표시 End -->
+        <div class="mb-3">
+            <label for="subject">제목</label> <!-- label 태그: 폼의 양식에 이름을 붙이는 태그 -->
+            <!-- for속성을 통해 다른 요소의 결합할 수 있음(for 속성값 == 결합하고자 하는 요소의 id 속성값) -->
+            <input type="text" class="form-control" name="subject" id="subject" value="{{ form.subject.data or '' }}">
+            <!-- input 태그: form 태그에서 제일 중요한 역할로 사용자로부터 정보를 입력 받음. -->
+            <!-- type="text: 한 줄의 입력 필드, name 속성: 텍스트 요소의 이름 명시, id 속성: 요소의 고유 식별자 -->
+            <!-- value 속성 -> 이미 전송된 데이터가 다시 설정됨.(제목만 입력하고 등록해서 다시 입력해야할 때 제목 내용이 지워지지 않음.) -->
+            <!-- [or '']은 "현재 템플릿이 GET 방식으로 요청되는 경우 기존 입력값이 없으므로 None으로 출력되는 것을 방지하기 위해서 사용 -->
+        </div>
+        <div class="mb-3">
+            <label for="content">내용</label>
+            <textarea class="form-control" name="content" id="content" rows="10">{{ form.content.data or '' }}</textarea>
+            <!-- textarea 태그: 여러 줄의 텍스트를 입력할 수 있는 텍스트 입력 영역 -->
+        </div>
+        <button type="submit" class="btn btn-primary">저장하기</button> <!-- button 태그: form요소에 입력된 내용을 서버로 전송할 때 사용 -->
+        <!-- type 속성 -> submit: form 요소에 제출용으로 사용된다. -->
+        <!-- 데이터를 어디로 보내야할 지는 굳이 명시하지 않아도 된다. 질문 목록 페이지에서 질문 등록하기 버튼을 누르면 GET 요청으로 이 페이지가 켜지고 --> 
+        <!-- 이 페이지의 주소 자체가 question/create/이기 때문에 여기서 폼을 post로 보내면 자동으로 create함수에 post요청이 간다. -->
+    </form>
+</div>
+{% endblock %}

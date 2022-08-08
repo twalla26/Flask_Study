@@ -10,3 +10,6 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(os.path.join(BASE_DIR, 'pybo.db'
 # SQLite는 파이썬 기본 패키지에 포함된 데이터베이스로, 주로 소규모 프로젝트에서 사용하는 가벼운 파일을 기반으로 한 데이터베이스다.
 SQLALCHEMY_TRACK_MODIFICATIONS = False 
 # SQLALCHEMY_TRACK_MODIFICATIONS는 수정사항을 추적하고 신호를 내보낸다던데, 추가적인 메모리를 필요로 하고 현 프로젝트에서 불필요한 기능이니 비활성화.
+SECRET_KEY = "dev" 
+# SECRET_KEY는 CSRF(cross-site request forgery)라는 웹 사이트 취약점 공격을 방지하는 데 사용됨.
+# CSRF: 사용자의 요청을 위조하는 웹 사이트 공격 기법, SECRET_KEY를 기반으로 생성되는 CSRF 토큰은 폼으로 전송된 데이터가 실제 웹 페이지에서 작성된 데이터인지를 판단해 주는 가늠자 역할을 함

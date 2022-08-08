@@ -1,5 +1,5 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}"> <!-- static 디렉터리의 style.css 파일을 연결한다는 의미 -->
-<!-- link태그: 해당 문서와 외부 소스 사이의 관계를 정의, rel 속성: 필수 속성으로 연관관계(relationship) 명시, href(hypertext reference): 링크될 외부 리소스의 URL 명시 -->
+{% extends 'base.html' %} <!-- base.html을 상속 받음 -->
+{% block content %}
 <div class="container my-3">
     <!-- 질문 -->
     <h2 class="border-bottom py-2">{{ question.subject }}</h2> <!-- 질문 제목 -->
@@ -40,3 +40,4 @@
             <!-- type 속성: 입력 태그의 유형(submit: 서버로 제출/전송하는 버튼) value 속성: 입력 태그의 초깃값(사용자가 변경할 수 있음)-->
         </form>
 </div>
+{% endblock %}

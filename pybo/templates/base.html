@@ -1,0 +1,22 @@
+<!doctype html> <!-- doctype선언: HTML 문서에서 <html> 태그를 정의하기 전에 가장 먼저 선언됨 -->
+<html lang="ko">
+    <head> <!-- head의 내용은 웹 페이지에 표시되지 않지만, 페이지에 대한 메타데이터(데이터를 설명하는 데이터)를 포함함 -->
+        <!-- Required meta tags -->
+        <meta charset="utf-8"> <!-- character set: 문서에서 허용하는 문자 집합, utf-8은 많은 언어들을 포함하고 있음 -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> 
+        <!-- name: 메타요소가 어떤 정보의 형태를 가지는지 알려줌(viewport: 반응형 웹), content: 실제 메타데이터의 컨텐츠 -->
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+        <!-- link태그: 해당 문서와 외부 소스 사이의 관계를 정의, rel 속성: 필수 속성으로 연관관계(relationship) 명시, href(hypertext reference): 링크될 외부 리소스의 URL 명시 -->
+        <!-- pybo CSS -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- static 디렉터리의 style.css 파일을 연결한다는 의미 -->
+        <title>Hello, pybo!</title> <!-- title: HTML문서 전체의 타이틀 표현하기 위한 메타데이터 -->
+    </head>
+    <body> <!-- 해당 HTML 문서의 텍스트, 하이퍼링크, 이미지, 리스트 등과 같은 모든 콘텐츠를 포함하는 영역을 정의 -->
+        <!-- 기본 템플릿 안에 삽입될 내용 Start -->
+        {% block content %}
+        <!-- 이 부분이 base.html을 상속한 템플릿에서 구현되어야할 영역 -->
+        {% endblock %}
+        <!-- 기본 템플릿 안에 삽입될 내용 End -->
+    </body>
+</html>

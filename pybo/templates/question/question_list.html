@@ -1,4 +1,5 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}"> <!-- 부트스트랩 적용 -->
+{% extends 'base.html' %} <!-- base.html을 상속 받음 -->
+{% block content %}
 <div class="container my-3"> <!-- class 속성: 태그들을 그룹 지을 때 사용, 같은 클래스 값을 가진 요소들에게 공통적인 스타일 적용. container my-3: 부트스트랩이 제공하는 클래스 -->
     <table class="table"> <!-- table 태그: 표를 만듦 -->
         <thead> <!-- 표의 제목 -->
@@ -28,4 +29,7 @@
         {% endif %}
         </tbody>
     </table>
+    <a href="{{ url_for('question.create') }}" class="btn btn-primary">질문 등록하기</a> <!-- 질문 등록 버튼 생성 -->
+    <!-- '질문 등록하기'버튼을 누르면 question블루프린트의 create함수가 실행됨. 메소드는 GET -->
 </div>
+{% endblock %}
