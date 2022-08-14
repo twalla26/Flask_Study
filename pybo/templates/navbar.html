@@ -1,0 +1,34 @@
+<!-- 내비게이션 바 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Pybo</a> <!-- Pybo를 누르면 main블루프린트의 index함수 실행 -->
+        <!-- a 태그: 하이퍼링크를 걸어주는 태그 hypertext reference: 클릭 시 이동할 링크 -->
+        <button class="navbar-toggler" type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#navbarSupportedContent" 
+                aria-controls="navbarSupportedContent" 
+                aria-expanded="false" 
+                aria-label="Toggle navigation">
+        <!-- button 태그: 디자인에 제약이 있는 input 보다 디자인 폭이 넓음, type="button": 기능 구현에 사용, 자바스크립트 이벤트 실행 목적 -->
+            <span class="navbar-toggler-icon"></span> <!-- span 태그: 특별한 기능 없이 css와 함께 쓰임.(줄바꿈 불가능) -->
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            {% if g.user %} <!-- 사용자가 로그인 상태 -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">{{ g.user.username }} (로그아웃)</a> <!-- 사용자 이름 (로그아웃) 표시 -->
+                </li>
+            </ul>
+            {% else %} <!-- 사용자가 로그아웃 상태 -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.signup') }}">계정생성</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">로그인</a>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</nav>

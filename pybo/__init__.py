@@ -28,8 +28,14 @@ def create_app(): # 애플리케이션 팩토리 -> 쉽게 말해 app 객체를 
     from .views import main_views # 같은 경로에 있는 views폴더에서 main_views를 import -> bp 등록
     from .views import question_views
     from .views import answer_views
+    from .views import auth_views
     app.register_blueprint(main_views.bp) # main_views.py에 있던 블루프린트 객체 bp를 플라스크 앱에 등록.
     app.register_blueprint(question_views.bp)
     app.register_blueprint(answer_views.bp)
+    app.register_blueprint(auth_views.bp)
+
+    # 필터
+    from .filter import format_datetime # filter.py 파일에서 format_datetime함수를 가져옴.
+    app.jinja_env.filters['datetime'] = format_datetime # datetime 라는 이름으로 필터 등록
 
     return app

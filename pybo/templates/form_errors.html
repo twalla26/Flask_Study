@@ -1,0 +1,19 @@
+<!-- 필드 오류 -->
+{% if form.errors %} <!-- form에 오류들이 있다면 -->
+<div class="alert alert-danger" role="alert">
+    {% for field, errors in form.errors.items() %} <!-- 각 필드에 일어난 오류들에 대하여 -->
+    <strong>{{ form[field].label }}</strong> <!-- 필드명을 표시해주고 -->
+    <ul>
+        {% for error in errors %} <!-- 그 필드에 일어난 오류들에 대해서 -->
+        <li>{{ error }}</li> <!-- 오류를 표시해줌 -->
+        {% endfor %}
+    </ul>
+    {% endfor %}
+</div>
+{% endif %}
+<!-- flash 오류 -->
+{% for message in get_flashed_messages() %} <!-- flash함수에 입력한 오류 메세지들에 대하여 -->
+<div class="alert alert-danger" role="alert">
+    {{ message }} <!-- 오류 메세지를 표시 -->
+</div>
+{% endfor %}

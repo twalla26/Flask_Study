@@ -14,7 +14,7 @@ class Question(db.Model): # 모델 클래스를 만드려면 db.Model 클래스�
     # 기본 키로 설정한 속성은 값이 1부터 자동으로 증가하여 저장됨.
     # nullabl: 속성에 값을 저장할 때 빈 값을 허용할 지의 여부. nullable을 설정해두지 않으면 기본으로 빈 값을 허용함.
 
-class Answer(db.Model):
+class Answer(db.Model): # 질문에 대한 답변 모델
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id', ondelete='CASCADE'))
     question = db.relationship('Question', backref=db.backref('answer_set', cascade='all, delete-orphan'))
@@ -29,3 +29,8 @@ class Answer(db.Model):
     # 역참조: 질문에서 답변을 거꾸로 참조하는 것. (어떤 질문 객체가 a_question라면 a_question.answer_set로 질문에 달린 답변들을 참조할 수 있음.)
     # cascade='all, delete-orphan'을 통해 파이썬 코드만으로 답변 데이터 삭제가 가능해짐.
     
+class User(db.Model): # 사용자 모델
+    id = db.Column(db.Integer, primary_key=True) # id는 자동으로 증가하는 User 모델의 기본 키
+    username = db.Column(db.String(150), unique=True, nullable=False) # unique=True: 같은 값을 저장할 수 없다.
+    password = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)

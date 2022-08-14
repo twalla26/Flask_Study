@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h5 class="my-3 border-bottom pb-2">계정생성</h5>
+    <form method="post">
+        {{ form.csrf_token }}
+        {% include "form_errors.html" %} <!-- 회원가입을 할 때 발생할 수 있는 오류를 표시하기 위함. -->
+        <div class="mb-3">
+            <label for="username">사용자 이름</label> <!-- label 태그: 폼의 양식에 이름을 붙이는 태그 -->
+            <!-- for속성을 통해 다른 요소의 결합할 수 있음(for 속성값 == 결합하고자 하는 요소의 id 속성값) -->
+            <input type="text" class="form-control" name="username" id="username" value="{{ form.username.data or '' }}">
+            <!-- input 태그: form 태그에서 제일 중요한 역할로 사용자로부터 정보를 입력 받음. -->
+            <!-- type="text: 한 줄의 입력 필드, name 속성: 텍스트 요소의 이름 명시, id 속성: 요소의 고유 식별자 -->
+            <!-- value 속성 -> 이미 전송된 데이터가 다시 설정됨.(이름만 입력하고 등록해서 다시 입력해야할 때 이름 내용이 지워지지 않음.) -->
+            <!-- [or '']은 "현재 템플릿이 GET 방식으로 요청되는 경우 기존 입력값이 없으므로 None으로 출력되는 것을 방지하기 위해서 사용 -->
+        </div>
+        <div class="mb-3">
+            <label for="password1">비밀번호</label>
+            <input type="password" class="form-control" name="password1" id="password1" value="{{ form.password1.data or '' }}">
+        </div>
+        <div class="mb-3">
+            <label for="password2">비밀번호 확인</label>
+            <input type="password" class="form-control" name="password2" id="password2" value="{{ form.password2.data or '' }}">
+        </div>
+        <div class="mb-3">
+            <label for="email">이메일</label>
+            <input type="text" class="form-control" name="email" id="email" value="{{ form.email.data or '' }}">
+        </div>
+        <button type="submit" class="btn btn-primary">생성하기</button> <!-- button 태그: form요소에 입력된 내용을 서버로 전송할 때 사용 -->
+        <!-- type 속성 -> submit: form 요소에 제출용으로 사용된다. -->
+        <!-- 데이터를 어디로 보내야할 지는 굳이 명시하지 않아도 된다. 질문 목록 페이지에서 질문 등록하기 버튼을 누르면 GET 요청으로 이 페이지가 켜지고 --> 
+        <!-- 이 페이지의 주소 자체가 auth/signup/이기 때문에 여기서 폼을 post로 보내면 자동으로 create함수에 post요청이 간다. -->
+    </form>
+</div>
+{% endblock %}

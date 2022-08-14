@@ -8,7 +8,7 @@
             <div class="card-text" style="white-space: pre-line;">{{ question.content }}</div> <!-- 질문 내용 -->
             <div class="d-flex justify-content-end">
                 <div class="badge bg-light text-dark p-2">
-                    {{ question.create_date }} <!-- 질문 작성 일시 -->
+                    {{ question.create_date|datetime }} <!-- 질문 작성 일시 -->
                 </div>
             </div>
         </div>
@@ -21,7 +21,7 @@
             <div class="card-text" style="white-space: pre-line;">{{ answer.content }}</div> <!-- answer 객체의 내용들을 나열 -->
             <div class="d-flex justify-content-end">
                 <div class="badge bg-light text-dark p-2">
-                    {{ answer.create_date }} <!-- answer 객체의 질문 작성일시 나열 -->
+                    {{ answer.create_date|datetime }} <!-- answer 객체의 질문 작성일시 나열 -->
                 </div>
             </div>
         </div>
@@ -31,6 +31,21 @@
     <form action="{{ url_for('answer.create', question_id=question.id) }}" method="post" class="my-3"> <!-- 답변 등록 폼 -->
         <!-- form 태그: 사용자로부터 데이터를 입력을 받을 수 있도록 함. action 속성: form 제출시 데이터를 어디로 보낼지 지정(url) -->
         <!-- method 속성: 데이터를 보낼 때 사용할 HTTP 메서드 지정 -->
+        {{ form.csrf_token }}
+        <!-- 오류표시 Start -->
+        {% if form.errors %} <!-- form에 에러갸 있다면 -->
+        <div class="alert alert-danger" role="alert">
+            {% for field, errors in form.errors.items() %} <!-- 그 에러들 중 각 항목들에 대해 -->
+            <strong>{{ form[field].label }}</strong> <!-- 에러가 일어난 라벨 표시 -->
+            <ul>
+                {% for error in errors %} <!-- 일어난 에러들 중에 -->
+                <li>{{ error }}</li> <!-- 에러 내용 표시 -->
+                {% endfor %}
+            </ul>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <!-- 오류표시 End -->
         <div class="mb-3">
             <textarea name="content" id="content" class="form-control" rows="10"></textarea> <!-- 답변 등록 칸 -->
             <!-- textarea 태그: 여러 줄을 입력할 수 있는 텍스트 필드, name 속성: 텍스트 요소의 이름 명시, id 속성: 요소의 고유 식별자, rows 속성: 총 10줄-->
