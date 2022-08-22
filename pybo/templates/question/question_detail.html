@@ -1,28 +1,77 @@
 {% extends 'base.html' %} <!-- base.html을 상속 받음 -->
 {% block content %}
 <div class="container my-3">
+    <!-- flash 오류 -->
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-danger" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
     <!-- 질문 -->
     <h2 class="border-bottom py-2">{{ question.subject }}</h2> <!-- 질문 제목 -->
     <div class="card my-3">
         <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;">{{ question.content }}</div> <!-- 질문 내용 -->
+            <div class="card-text">{{ question.content|markdown }}</div> <!-- 질문 내용 -->
             <div class="d-flex justify-content-end">
-                <div class="badge bg-light text-dark p-2">
-                    {{ question.create_date|datetime }} <!-- 질문 작성 일시 -->
+                {% if question.modify_date %} <!-- 답변 수정 날짜가 있다면 표시-->
+                <div class="badge bg-light text-dark p-2 text-start mx-3">
+                    <div class="mb-2">modified at</div>
+                    <div>{{ question.modify_date|datetime }}</div>
                 </div>
+                {% endif %}
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="mb-2">{{ question.user.username }}</div> <!-- 질문 글쓴이 추가 -->
+                    <div>{{ question.create_date|datetime }}</div> <!-- 질문 작성 일시 -->
+                </div>
+            </div>
+            <div class="my-3"> <!-- 질문 수정 버튼 --> 
+                <a href="javascript:void(0)" data-uri="{{ url_for('question.vote', question_id=question.id) }}"
+                    class="recommend btn btn-sm btn-outline-secondary">추천
+                    <span class="badge rounded-pill bg-success">{{ question.voter|length }}</span>
+                </a> <!-- 질문 수정 버튼 옆에 추천 버튼 추가, 추천인 수 표시 -->
+                {% if g.user == question.user %} <!-- 사용자가 글 작성자라면 -->
+                <a href="{{ url_for('question.modify', question_id=question.id) }}" 
+                    class="btn btn-sm btn-outline-secondary">수정</a> <!-- 수정 버튼 생성 -->
+                <a href="javascript:void(0)" class="delete btn btn-sm btn-outline-secondary" 
+                    data-uri="{{ url_for('question.delete', question_id=question.id) }}">삭제</a> <!-- 질문 삭제 버튼 -->
+                    <!-- <삭제> 버튼은 <수정> 버튼과는 달리 href 속성값을 "javascript:void(0)"로 설정했다. -->
+                    <!-- href 속성값을 javascript:void(0)로 설정하면 해당 링크를 클릭해도 아무런 동작도 하지 않는다. -->
+                    <!-- 그리고 삭제를 실행할 URL을 얻기 위해 data-uri 속성을 추가하고, <삭제> 버튼이 눌리는 이벤트를 확인할 수 있도록 class 속성에 "delete" 항목을 추가해 주었다. -->
+                    <!-- href에 삭제 URL을 직접 사용하지 않고 이러한 방식을 사용하는 이유는 삭제 버튼을 클릭했을때 "정말로 삭제하시겠습니까?" 와 같은 확인창이 필요하기 때문이다. -->
+                {% endif %}
             </div>
         </div>
     </div>
     <!-- 답변 목록 -->
     <h5 class="border-bottom my-3 py-2">{{ question.answer_set|length }}개의 답변이 있습니다.</h5> <!-- 답변 갯수 -->
     {% for answer in question.answer_set %} <!-- question.answer_set에 있는 데이터를 하나씩 꺼내 answer 객체에 대입 -->
+    <a id="answer_{{ answer.id }}"></a> <!-- 앵커 태그: URL 호출시 원하는 위치로 이동, 아이디 속성은 답변 아이디로 설정 -> 답변 작성 후 리다이렉트 했을 때 스크롤을 안내려도 됨.-->
     <div class="card my-3">
         <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;">{{ answer.content }}</div> <!-- answer 객체의 내용들을 나열 -->
+            <div class="card-text">{{ answer.content|markdown }}</div> <!-- answer 객체의 내용들을 나열, 마크다운 적용 -->
             <div class="d-flex justify-content-end">
-                <div class="badge bg-light text-dark p-2">
-                    {{ answer.create_date|datetime }} <!-- answer 객체의 질문 작성일시 나열 -->
+                {% if answer.modify_date %} <!-- 답변 수정 날짜가 있다면 표시 -->
+                <div class="badge bg-light text-dark p-2 text-start mx-3">
+                    <div class="mb-2">modified at</div>
+                    <div>{{ answer.modify_date|datetime }}</div>
                 </div>
+                {% endif %}
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="mb-2">{{ answer.user.username }}</div> <!-- 답변 글쓴이 추가 -->
+                    <div>{{ answer.create_date|datetime }}</div> <!-- answer 객체의 질문 작성일시 나열 -->
+                </div>
+            </div>
+            <div class="my-3"> <!-- 답변 수정 -->
+                <a href="javascript:void(0)" data-uri="{{ url_for('answer.vote', answer_id=answer.id) }}"
+                    class="recommend btn btn-sm btn-outline-secondary">추천
+                    <span class="badge rounded-pill bg-success">{{ answer.voter|length }}</span>
+                </a> <!-- 답변 수정 버튼 옆에 추천 버튼 추가, 추천인 수도 표시 -->
+                {% if g.user == answer.user %} <!-- 사용자가 답변 작성자라면 -->
+                <a href="{{ url_for('answer.modify', answer_id=answer.id) }}"
+                    class="btn btn-sm btn-outline-secondary">수정</a> <!-- 답변 수정 버튼 생성 --> 
+                <a href="#" class="delete btn btn-sm btn-outline-secondary"
+                    data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}">삭제</a> <!-- 답변 삭제 버튼 생성 -->
+                {% endif %}
             </div>
         </div>
     </div>
@@ -46,8 +95,10 @@
         </div>
         {% endif %}
         <!-- 오류표시 End -->
+        <!-- 답변 등록 칸 -->
         <div class="mb-3">
-            <textarea name="content" id="content" class="form-control" rows="10"></textarea> <!-- 답변 등록 칸 -->
+            <textarea {% if not g.user %}disabled{% endif %}
+                name="content" id="content" class="form-control" rows="10"></textarea>  <!-- 사용자가 로그아웃 상태라면 답변 등록이 불가능하게 설정 -->
             <!-- textarea 태그: 여러 줄을 입력할 수 있는 텍스트 필드, name 속성: 텍스트 요소의 이름 명시, id 속성: 요소의 고유 식별자, rows 속성: 총 10줄-->
         </div>
         <input type="submit" value="답변등록" class="btn btn-primary"> <!-- 답변 등록 버튼 -->
@@ -55,4 +106,24 @@
             <!-- type 속성: 입력 태그의 유형(submit: 서버로 제출/전송하는 버튼) value 속성: 입력 태그의 초깃값(사용자가 변경할 수 있음)-->
         </form>
 </div>
+{% endblock %}
+{% block script %}
+<script type="text/javascript"> // <script>태그: 자바스크립트와 같은 클라이언트 사이드 스크립트(client-side scripts)를 정의할 때 사용
+    const delete_elements = document.getElementsByClassName("delete"); // delete라는 클래스를 포함하는 버튼이나 링크를 누르면 
+    Array.from(delete_elements).forEach(function(element) {
+        element.addEventListener('click', function() {
+            if (confirm("정말로 삭제하시겠습니까?")) { // "정말로 삭제?"라는 질문을 하고 확인을 선택하면 
+                location.href = this.dataset.uri; // 해당 컴포넌트의 data-uri 값으로 url을 호출하라는 의미
+            }; // data-uri 속성에 해당하는 'question.delete' URL이 호출될 것
+        }); // 확인 대신 취소를 선택하면 아무 일도 일어나지 않음.
+    });
+    const recommend_elements = document.getElementsByClassName("recommend");
+    Array.from(recommend_elements).forEach(function(element) {
+        element.addEventListener('click', function() {
+            if (confirm("정말로 추천하시겠습니까?")) {
+                location.href = this.dataset.uri;
+            };
+        });
+    });
+</script>
 {% endblock %}

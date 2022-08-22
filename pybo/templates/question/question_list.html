@@ -1,11 +1,27 @@
 {% extends 'base.html' %} <!-- base.html을 상속 받음 -->
 {% block content %}
 <div class="container my-3"> <!-- class 속성: 태그들을 그룹 지을 때 사용, 같은 클래스 값을 가진 요소들에게 공통적인 스타일 적용. container my-3: 부트스트랩이 제공하는 클래스 -->
+    <div class="row my-3">
+        <div class="col-6">
+            <a href="{{ url_for('question.create') }}" class="btn btn-primary">질문 등록하기</a> <!-- 질문 등록 버튼 -->
+            <!-- '질문 등록하기'버튼을 누르면 question 블루프린트의 create함수가 실행됨. 메소드는 GET -->
+        </div>
+        <div class="col-6"> 
+            <div class="input-group">
+                <input type="text" id="search_kw" class="form-control" value="{{ kw or '' }}"> <!-- 검색어를 입력할 수 있는 텍스트 창 -->
+                <!-- id="search_kw" -> 자바스크립트에서 텍스트창에 입력된 값을 읽기 위함. -->
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="btn_search">찾기</button> <!-- 검색 내용 입력 후 찾기 버튼 클릭 -->
+                </div>
+            </div>
+        </div>
+    </div>
     <table class="table"> <!-- table 태그: 표를 만듦 -->
         <thead> <!-- 표의 제목 -->
-        <tr class="table-dark"> <!-- tr(table row): 표의 행 -->
+        <tr class="text-center table-dark"> <!-- tr(table row): 표의 행, text-center: th 엘리먼트 가운데 정렬 -->
             <th>번호</th> <!-- th(table head): 제목 셀 -->
-            <th>제목</th>
+            <th stype="width:50%">제목</th> <!-- 제목 너비가 전체에서 50% 차지하도록 -->
+            <th>글쓴이</th>
             <th>작성일시</th>
         </tr>
         </thead>
@@ -13,16 +29,17 @@
         <!-- 질문 목록 -->
         {% if question_list %} <!-- 템플릿 태그, 파이썬 코드와 연결됨. render_template 함수에서 전달받은 질문 목록 데이터 question_list가 있는지 검사 -->
         {% for question in question_list.items %} <!-- question_list에 있는 데이터를 하나씩 꺼내 question 객체에 대입 -->
-        <tr> <!-- table row, 표의 행 -->
+        <tr class="text-center"> <!-- table row, 표의 행, text-center: 테이블 내용가운데 정렬 -->
             <td>{{ question_list.total - ((question_list.page - 1) * question_list.per_page) - loop.index0 }}</td> <!-- td(table data): 테이블에 들어가는 데이터, loop.index: 1부터 시작하는 index값 반환 -->
             <!-- 번호 = 전체 게시물 개수 - (현재 페이지 - 1) * 페이지당 게시물 개수 - 나열 인덱스 -->
-            <td>
+            <td class="text-start"> <!-- 제목은 왼쪽 정렬 -->
                 <a href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a> <!-- 테이블에 질문 제목이 들어감 -->
                 <!-- question.subject의 question은 위의 for문의 question 객체임-->
                 {% if question.answer_set|length > 0 %} <!-- 질문 제목 옆에 질문에 달린 답변 갯수를 입력 -->
                 <span class="text-danger small mx-2">{{ question.answer_set|length }}</span> <!-- span 태그: div 처럼 특별한 기능 없이 css와 함께 쓰임.-->
                 {% endif %}
             </td>
+            <td>{{ question.user.username }}</td> <!-- 글쓴이 추가 -->
             <td>{{ question.create_date|datetime }}</td> <!-- 테이블에 질문 작성일시가 들어감. -->
         </tr>        
         {% endfor %}
@@ -38,7 +55,8 @@
         <!-- 이전 페이지 -->
         {% if question_list.has_prev %} <!-- Pagination 객체, has_prev: 이전 페이지 존재 여부 -> True/False --> 
         <li class="page-items">
-            <a class="page-link" href="?page={{ question_list.prev_num }}">이전</a> <!-- prev_num: 이전 페이지 번호 -->
+            <a class="page-link" data-page="{{ question_list.prev_num }}" href="javascript:void(0)">이전</a> <!-- prev_num: 이전 페이지 번호 -->
+            <!-- 페이지 링크를 href 속성에 직접 입력하는 대신 data-page 속성으로 값을 읽을 수 있도록 변경했다. -->
         </li>
         {% else %} <!-- 이전 페이지가 없다면 -->
         <li class="page-item disabled"> <!-- 이전 페이지로 이동 불가능 -->
@@ -50,7 +68,7 @@
             {% if page_num %} <!-- 페이지 범위 중 1,2,3,4,5,30,31에 해당하는 부분 -->
                 {% if page_num != question_list.page %} <!-- 페이지 번호가  현재 페이지 번호와 다르면 -->
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a> <!-- 클릭 시 각 페이지로 이동 -->
+                    <a class="page-link" data-page="{{ page_num }}" href="javascript:void(0)">{{ page_num }}</a> <!-- 클릭 시 각 페이지로 이동 -->
                 </li>
                 {% else %} <!-- 페이지 번호가 현재 페이지 번호와 같으면 -->
                 <li class="page-item active" aria-current="page"> <!-- 페이지 번호를 active 클래스로 강조 -->
@@ -66,7 +84,7 @@
         <!-- 다음 페이지 -->
         {% if question_list.has_next %} <!-- 다음 페이지가 존재한다면 -->
         <li class="page-item">
-            <a class="page-link" href="?page={{ question_list.next_num }}">다음</a> <!-- '다음' 클릭 시 다음 페이지로 이동 -->
+            <a class="page-link" data-page="{{ question_list.next_num }}" href="javascript:void(0)">다음</a> <!-- '다음' 클릭 시 다음 페이지로 이동 -->
         </li>
         {% else %} <!-- 다음 페이지가 존재하지 않는다면 -->
         <li class="page-item disabled"> <!-- 다음 페이지로 이동 불가능 -->
@@ -75,7 +93,28 @@
         {% endif %}
     </ul>
     <!-- 페이징 처리 끝 -->
-    <a href="{{ url_for('question.create') }}" class="btn btn-primary">질문 등록하기</a> <!-- 질문 등록 버튼 생성 -->
-    <!-- '질문 등록하기'버튼을 누르면 question 블루프린트의 create함수가 실행됨. 메소드는 GET -->
 </div>
+<!-- 검색어와 페이지를 GET 방식으로 받기 위함 -->
+<form id="searchForm" method="get" action="{{ url_for('question._list') }}"> <!-- 페이지와 검색어를 question블루프린트의 _list 함수로 전달 -->
+    <input type="hidden" id="kw" name="kw" value="{{ kw or '' }}"> <!-- value에는 이전에 요청했던 값을 기억할 수 있도록 그 값 대입 -->
+    <input type="hidden" id="page" name="page" value="{{ page }}"> <!-- kw와 page 값은 목록 조회 함수에서 전달됨. -->
+</form>
+{% endblock %}
+{% block script %}
+<!-- 검색어, 페이지 처리 -->
+<script type="text/javascript">
+    const page_elements = document.getElementsByClassName("page-link"); // class 속성값으로 "page-link"라는 값을 가지고 있는 링크를 클릭하면
+    Array.from(page_elements).forEach(function(element) { // 이 링크의 data-page 속성값을 읽어 searchForm의 page 필드에 설정하여 searchForm을 요청
+        element.addEventListener('click', function() { // searchForm은 바로 위에 endblock 위의 form태그 참고!
+            document.getElementById('page').value = this.dataset.page;
+            document.getElementById('searchForm').submit();
+        });
+    });
+    const btn_search = document.getElementById("btn_search"); // 검색 버튼을 클릭하면 
+    btn_search.addEventListener('click', function() { // 검색어 텍스트창에 입력된 값을 searchForm의 kw 필드에 설정하여 searchForm을 요청
+        document.getElementById('kw').value = document.getElementById('search_kw').value;
+        document.getElementById('page').value = 1; // 검색 버튼을 클릭할 경우 새로운 검색에 해당되므로 1페이지부터 조회
+        document.getElementById('searchForm').submit();
+    });
+</script>
 {% endblock %}

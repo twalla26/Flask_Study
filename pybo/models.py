@@ -1,6 +1,22 @@
 from pybo import db # __init__.py 파일에서 db객체 import
 
 
+question_voter = db.Table( # ManyToMany 관계를 적용하기 위해서는 db.Table을 통해 N:N 관계를 의미하는 테이블을 먼저 생성
+    # question_voter는 사용자 id와 질문 id를 쌍으로 갖는 테이블 객체
+    'question_voter', 
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), primary_key=True),
+    db.Column('question_id', db.Integer, db.ForeignKey('question.id', ondelete='CASCADE'), primary_key=True)
+    # 사용자 id와 질문 id가 모두 PK(primary_key)이므로 ManyToMany관계가 성립된다.
+)
+
+answer_voter = db.Table( # ManyToMany 관계를 적용하기 위해서는 db.Table을 통해 N:N 관계를 의미하는 테이블을 먼저 생성
+    'answer_voter',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), primary_key=True),
+    db.Column('answer_id', db.Integer, db.ForeignKey('answer.id', ondelete='CASCADE'), primary_key=True)
+    # 사용자 id와 답변 id가 모두 PK(primary_key)이므로 ManyToMany관계가 성립된다.
+)
+
+
 class Question(db.Model): # 모델 클래스를 만드려면 db.Model 클래스를 상속하여 만들어야 함. 이때 db는 __init__.py파일에서 생성한 SQLAlchemy 클래스의 객체임.
     id = db.Column(db.Integer, primary_key=True)
     subject = db.Column(db.String(200), nullable=False)
@@ -13,6 +29,17 @@ class Question(db.Model): # 모델 클래스를 만드려면 db.Model 클래스�
     # primary_key: 아이디 속성을 기본 키로 설정 -> 데이터베이스에서 중복된 값을 가질 수 없게 만듦. id는 모델에서 각 데이터를 구분할 수 있는 유일한 값이므로 기본 키로 설정함.
     # 기본 키로 설정한 속성은 값이 1부터 자동으로 증가하여 저장됨.
     # nullabl: 속성에 값을 저장할 때 빈 값을 허용할 지의 여부. nullable을 설정해두지 않으면 기본으로 빈 값을 허용함.
+
+    # 질문에 글쓴이를 추가하기
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False) # 글쓴이 고유 아이디 -> 외래키로 테이블 연결
+    user = db.relationship('User', backref=db.backref('question_set')) # 글쓴이 모델 참조, question_set으로 역참조 설정도 가능
+
+    modify_date = db.Column(db.DateTime(), nullable=True) # 글 수정날짜 추가, 빈값 허용
+
+    voter = db.relationship('User', secondary=question_voter, backref=db.backref('question_voter_set'))
+    # 첫 번쨰 속성 'User': voter는 추천인이므로 기본적으로 User 모델과 연결된 속성임.
+    # 두 번째 속성 secondary: 다대다 기능 정의, 연관 테이블인 question_voter 테이블 객체를 참조
+    # Question 모델을 통해 추천인을 저장하면 실제 데이터는 question_voter 테이블에 저장되고 저장된 추천인 정보는 Question 모델의 voter 속성을 통해 참조할 수 있게 된다.
 
 class Answer(db.Model): # 질문에 대한 답변 모델
     id = db.Column(db.Integer, primary_key=True)
@@ -29,8 +56,22 @@ class Answer(db.Model): # 질문에 대한 답변 모델
     # 역참조: 질문에서 답변을 거꾸로 참조하는 것. (어떤 질문 객체가 a_question라면 a_question.answer_set로 질문에 달린 답변들을 참조할 수 있음.)
     # cascade='all, delete-orphan'을 통해 파이썬 코드만으로 답변 데이터 삭제가 가능해짐.
     
+    # 답변에 답변 작성자 추가하기
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False) # 작성자 고유 아이디
+    user = db.relationship('User', backref=db.backref('answer_set')) # 작성자 모델 참조, 역참조 설정
+
+    modify_date = db.Column(db.DateTime(), nullable=True) # 글 수정 날짜, 빈값 허용
+
+    voter = db.relationship('User', secondary=answer_voter, backref=db.backref('answer_voter_set'))
+    # 첫 번쨰 속성 'User': voter는 추천인이므로 기본적으로 User 모델과 연결된 속성임.
+    # 두 번째 속성 secondary: 다대다 기능 정의, 연관 테이블인 answer_voter 테이블 객체를 참조
+    # Answer 모델을 통해 추천인을 저장하면 실제 데이터는 answer_voter 테이블에 저장되고 저장된 추천인 정보는 Answer 모델의 voter 속성을 통해 참조할 수 있게 된다.
+
+
+
 class User(db.Model): # 사용자 모델
     id = db.Column(db.Integer, primary_key=True) # id는 자동으로 증가하는 User 모델의 기본 키
     username = db.Column(db.String(150), unique=True, nullable=False) # unique=True: 같은 값을 저장할 수 없다.
     password = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+

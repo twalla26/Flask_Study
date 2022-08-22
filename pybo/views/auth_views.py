@@ -6,6 +6,8 @@ from pybo import db
 from pybo.forms import UserCreateForm, UserLoginForm
 from pybo.models import User
 
+import functools
+
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -49,7 +51,12 @@ def login(): # 로그인 함수
             # 따라서 세션에 사용자의 id 값을 저장하면 다양한 URL 요청에 이 세션에 저장된 값을 읽을 수 있다. 
             # 예를 들어 세션 정보를 확인하여 현재 요청한 주체가 로그인한 사용자인지 아닌지를 판별할 수 있다
             session['user_id'] = user.id # 키는 'user_id' 문자열, 값은 데이터베이스에서 조회한 사용자의 고유 아이디
-            return redirect(url_for('main.index')) # 로그인 후, 메인 페이지(질문 목록 페이지)로 이동
+            # 로그아웃 상태에서 어떤 페이지에 들어갔다가 로그인 요청을 받고 로그인하려는 경우, login_required()함수에서 받은 _next(원래 가려던 페이지)를 처리하는 구간
+            _next = request.args.get('next', '') # 로그인 시, next 파라미터 값이 있으면 읽어서 해당 페이지로 이동, 없으면 메인페이지로 이동
+            if _next: # _next 변수에 원래 가려던 url이 있다면
+                return redirect(_next) # 원래 가려던 페이지로 이동
+            else: # _next변수가 빈 문자열이라면
+                return redirect(url_for('main.index')) # 메인 페이지(질문 목록 페이지)로 이동
         flash(error) # 오류가 있을 경우 -> flash()함수로 오류 표시
     return render_template('auth/login.html', form=form) # GET 요청 -> 로그인 페이지로 이동, 로그인 페이지에 필요한 form 전송.
 
@@ -60,6 +67,7 @@ def load_logged_in_user(): # 사용자 로그인 여부 확인 함수
     if user_id is None: # 만약 세션에 저장된 'user_id' 값이 없다면
         g.user = None # g.user에 None 저장
         # g: 플라스크의 컨텍스트 변수(global 변수), request 변수와 같이 [요청 -> 응답] 과정에서 유효함.
+        # g.user는 세션에 저장된 사용자 정보 데이터
     else: # session 변수에 user_id값이 있으면 
         g.user = User.query.get(user_id) # 데이터베이스에서 사용자 정보를 조회하여 g.user에 저장
     # -> 이후 사용자 로그인 검사를 할 때 session을 조사할 필요 없이, g.user에 값이 있는지만 확인하면 됨. 
@@ -70,3 +78,15 @@ def load_logged_in_user(): # 사용자 로그인 여부 확인 함수
 def logout(): # 로그아웃 함수
     session.clear() # 세션 초기화 -> 로그인 기록 삭제
     return redirect(url_for('main.index')) # 로그아웃 후 메인 페이지로 이동
+
+
+def login_required(view): # login_required 데코레이터 함수 정의
+    @functools.wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if g.user is None: # 사용자가 로그아웃 상태라면
+            _next = request.url if request.method == 'GET' else '' # 조건부 표현식 -> (조건문이 참인 경우) if (조건문) else (조건문이 거짓일 경우)
+            # GET 요청: _next = request.url -> 원래 가려던 url 저장
+            # 다른 요청: _next = '' -> _next 에는 빈 문자열 전달
+            return redirect(url_for('auth.login', next=_next)) # 로그인 페이지로 리다이렉트, next 파라미터도 전달
+        return view(*args, **kwargs) # 사용자가 로그인 상태라면, 원래 함수 그대로 실행
+    return wrapped_view
